@@ -3,7 +3,6 @@
 # Environments: dev, uat, prod
 # ============================================================================
 
-# Pin base image version for reproducibility
 ARG PYTHON_VERSION=3.12.8-slim-bookworm
 
 # -----------------------------------------------------------------------------
@@ -24,7 +23,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 
 # -----------------------------------------------------------------------------
-# STAGE 2: DEV - 
+# STAGE 2: DEV 
 # -----------------------------------------------------------------------------
 FROM python:${PYTHON_VERSION} AS dev
 
