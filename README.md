@@ -56,17 +56,6 @@ curl http://localhost:8080/health
 ```
 
 
-
-#### Useful Docker Commands
-```bash
-# View running containers
-docker ps
-
-# View logs
-docker logs <container-name>
-
-# Stop and remove container
-docker stop <container-name> && docker rm <container-name>
 ```
 
 ### Run Locally
