@@ -16,11 +16,6 @@ def get_user_gists(username: str) -> list:
     url = f"{GITHUB_API_BASE}/users/{username}/gists"
     headers = {"Accept": "application/vnd.github+json"}
     
-    # Optional: Use GitHub token if available to avoid rate limiting
-    token = os.environ.get("GITHUB_TOKEN")
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
-    
     response = requests.get(url, headers=headers, timeout=10)
     response.raise_for_status()
     

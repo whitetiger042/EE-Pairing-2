@@ -31,6 +31,7 @@ curl http://localhost:8080/health
 # 5. Cleanup
 docker stop gists-api && docker rm gists-api
 
+
 #### UAT Environment
 ```bash
 # Build
