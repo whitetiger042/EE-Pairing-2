@@ -1,43 +1,216 @@
-## :warning: Please read these instructions carefully and entirely first
-* Clone this repository to your local machine.
-* Use your IDE of choice to complete the assignment.
-* When you have completed the assignment, you need to  push your code to this repository and [mark the assignment as completed by clicking here](https://app.snapcode.review/submission_links/1b2ed3e7-a3c0-42d6-94e4-61f009dbc7cd).
-* Once you mark it as completed, your access to this repository will be revoked. Please make sure that you have completed the assignment and pushed all code from your local machine to this repository before you click the link.
+# GitHub Gists API
 
-## Operability Take-Home Exercise
+A simple HTTP API that returns a GitHub user's public Gists.
 
-Welcome to the start of our recruitment process for Operability Engineers. It was great to speak to you regarding an opportunity to join the Equal Experts network!
+## Project Structure
 
-Please write code to deliver a solution to the problems outlined below.
+```
+├── app.py              # Main Flask application
+├── test_app.py         # Automated tests (unit + integration)
+├── Dockerfile          # Multi-stage Docker build (dev/uat/prod)
+├── requirements.txt    # Python dependencies
+├── .dockerignore       # Files excluded from Docker build
+└── README.md           # This file
+```
 
-We appreciate that your time is valuable and do not expect this exercise to **take more than 90 minutes**. If you think this exercise will take longer than that, I **strongly** encourage you to please get in touch to ask any clarifying questions.
+## Quick Start
 
-### Submission guidelines
-**Do**
-- Provide a README file in text or markdown format that documents a concise way to set up and run the provided solution.
-- Take the time to read any applicable API or service docs, it may save you significant effort.
-- Make your solution simple and clear. We aren't looking for overly complex ways to solve the problem since in our experience, simple and clear solutions to problems are generally the most maintainable and extensible solutions.
+### Run with Docker (Recommended)
 
-**Don't**
+This project uses a **multi-stage Dockerfile** with three environments: `dev`, `uat`, and `prod`.
 
-Expect the reviewer to dedicate a machine to review the test by:
+#### Development Environment
+```bash
+# Build
+docker build --target dev -t gists-api:dev .
 
-- Installing software globally that may conflict with system software
-- Requiring changes to system-wide configurations
-- Providing overly complex solutions that need to spin up a ton of unneeded supporting dependencies. We aspire to keep our dev experiences as simple as possible (but no simpler)!
-- Include identifying information in your submission. We are endeavouring to make our review process anonymous to reduce bias.
+# Run the container (with hot reload)
+docker run -d --name gists-api-dev -p 8080:8080 gists-api:dev
 
-### Exercise
-If you have any questions on the below exercise, please do get in touch and we’ll answer as soon as possible.
+# Health check
+curl http://localhost:8080/health
+```
 
-#### Build an API, test it, and package it into a container
-- Build a simple HTTP web server API in any general-purpose programming language[^1] that interacts with the GitHub API and responds to requests on `/<USER>` with a list of the user’s publicly available Gists[^2].
-- Create an automated test to validate that your web server API works. An example user to use as test data is `octocat`.
-- Package the web server API into a docker container that listens for requests on port `8080`. You do not need to publish the resulting container image in any container registry, but we are expecting the Dockerfile in the submission.
-- The solution may optionally provide other functionality (e.g. pagination, caching) but the above **must** be implemented.
+# 5. Cleanup
+docker stop gists-api && docker rm gists-api
 
-Best of luck,  
-Equal Experts
-__________________________________________
-[^1]: For example Go, Python or Ruby but not Bash or Powershell.  
-[^2]: https://docs.github.com/en/rest/gists/gists?apiVersion=2022-11-28
+#### UAT Environment
+```bash
+# Build
+docker build --target uat -t gists-api:uat .
+
+# Run
+docker run -d --name gists-api-uat -p 8080:8080 gists-api:uat
+
+# Health check
+curl http://localhost:8080/health
+```
+
+#### Production Environment
+```bash
+# Build
+docker build --target prod -t gists-api:prod .
+
+# Run
+docker run -d --name gists-api-prod -p 8080:8080 gists-api:prod
+
+# Health check
+curl http://localhost:8080/health
+```
+
+
+
+#### Useful Docker Commands
+```bash
+# View running containers
+docker ps
+
+# View logs
+docker logs <container-name>
+
+# Stop and remove container
+docker stop <container-name> && docker rm <container-name>
+```
+
+### Run Locally
+
+Requires Python 3.10+
+
+```bash
+# Create virtual environment
+python3 -m venv venv
+
+# Activate virtual environment
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+# venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the server
+python app.py
+
+# Health check (in another terminal)
+curl http://localhost:8080/health
+```
+
+To deactivate the virtual environment:
+```bash
+deactivate
+```
+
+To free port 8080 (if already in use):
+```bash
+# Find the process using port 8080
+lsof -i :8080
+
+# Kill the process (replace <PID> with the actual process ID)
+kill <PID>
+```
+
+## API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/<username>` | GET | Returns list of public gists for the GitHub user |
+| `/health` | GET | Health check endpoint |
+
+## Usage
+
+Fetch a user's public gists:
+
+```bash
+curl http://localhost:8080/octocat
+```
+
+Sample Response:
+```json
+{
+  "user": "octocat",
+  "count": 8,
+  "gists": [
+    {
+      "id": "6cad326836d38bd3a7ae",
+      "url": "https://gist.github.com/octocat/6cad326836d38bd3a7ae",
+      "description": "Hello World!",
+      "created_at": "2014-02-04T14:38:36Z",
+      "updated_at": "2023-12-05T18:47:24Z",
+      "files": ["helloworld.rb"]
+    }
+  ]
+}
+```
+
+Health check:
+```bash
+curl http://localhost:8080/health
+```
+
+## Running Tests
+
+### Setup
+
+```bash
+# Create and activate virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt pytest responses
+```
+
+### Run Tests
+
+```bash
+# Run all unit tests (mocked, fast, no network calls)
+pytest -v
+
+# Run specific test class
+pytest test_app.py::TestGistsEndpoint -v
+
+# Run a single test
+pytest test_app.py::TestHealthEndpoint::test_health_returns_ok -v
+
+# Run integration tests (calls real GitHub API)
+pytest -v -m integration
+
+# Run all tests except integration
+pytest -v -m "not integration"
+```
+
+### Expected Output
+
+```
+test_app.py::TestFormatGist::test_format_gist_extracts_correct_fields     PASSED
+test_app.py::TestHealthEndpoint::test_health_returns_ok                   PASSED
+test_app.py::TestGistsEndpoint::test_get_gists_returns_user_gists         PASSED
+test_app.py::TestGistsEndpoint::test_get_gists_returns_404_for_unknown_user PASSED
+test_app.py::TestGistsEndpoint::test_get_gists_handles_empty_gist_list    PASSED
+test_app.py::TestGistsEndpoint::test_get_gists_handles_github_api_error   PASSED
+test_app.py::TestIntegration::test_octocat_gists_live                     PASSED
+
+7 passed
+```
+
+
+
+### Running with Dropped Capabilities
+
+For maximum security, run containers with dropped capabilities:
+
+```bash
+docker run \
+  --cap-drop=ALL \
+  --security-opt=no-new-privileges:true \
+  --read-only \
+  -p 8080:8080 \
+  gists-api:prod
+```
+
+| Flag | Purpose |
+|------|---------|
+| `--cap-drop=ALL` | Remove all Linux capabilities |
+| `--security-opt=no-new-privileges:true` | Prevent privilege escalation |
+| `--read-only` | Make container filesystem read-only |
