@@ -14,10 +14,7 @@ A simple HTTP API that returns a GitHub user's public Gists.
 ```
 
 ## Quick Start
-
-### Run with Docker (Recommended)
-
-This project uses a **multi-stage Dockerfile** with three environments: `dev`, `uat`, and `prod`.
+### Using Docker
 
 #### Development Environment
 ```bash
@@ -195,22 +192,3 @@ test_app.py::TestIntegration::test_octocat_gists_live                     PASSED
 ```
 
 
-
-### Running with Dropped Capabilities
-
-For maximum security, run containers with dropped capabilities:
-
-```bash
-docker run \
-  --cap-drop=ALL \
-  --security-opt=no-new-privileges:true \
-  --read-only \
-  -p 8080:8080 \
-  gists-api:prod
-```
-
-| Flag | Purpose |
-|------|---------|
-| `--cap-drop=ALL` | Remove all Linux capabilities |
-| `--security-opt=no-new-privileges:true` | Prevent privilege escalation |
-| `--read-only` | Make container filesystem read-only |
