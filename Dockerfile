@@ -13,18 +13,18 @@ FROM python:${PYTHON_VERSION} AS builder
 
 WORKDIR /app
 
-# Create virtual environment
+
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-# Upgrade pip and install dependencies
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 
 # -----------------------------------------------------------------------------
-# STAGE 2: DEV - Development with hot reload
+# STAGE 2: DEV - 
 # -----------------------------------------------------------------------------
 FROM python:${PYTHON_VERSION} AS dev
 
@@ -46,7 +46,7 @@ CMD ["python", "-m", "flask", "run", "--host=0.0.0.0", "--port=8080", "--reload"
 
 
 # -----------------------------------------------------------------------------
-# STAGE 3: UAT - User Acceptance Testing
+# STAGE 3: UAT 
 # -----------------------------------------------------------------------------
 FROM python:${PYTHON_VERSION} AS uat
 
@@ -71,7 +71,7 @@ CMD ["python", "app.py"]
 
 
 # -----------------------------------------------------------------------------
-# STAGE 4: PROD - Production (secure & minimal)
+# STAGE 4: PROD 
 # -----------------------------------------------------------------------------
 FROM python:${PYTHON_VERSION} AS prod
 
