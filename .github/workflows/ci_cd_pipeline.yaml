@@ -37,6 +37,7 @@ jobs:
             isort-options: "-w 100"
 
     build:
+        needs: [lint]
         runs-on: ubuntu-latest
         permissions:
           contents: read
@@ -56,7 +57,7 @@ jobs:
           uses: docker/build-push-action@v6
           with:
             push: true
-            tags: user/app:latest
+            tags: ghcr.io/whitetiger042/gists-api:latest
             context: .
 
           
